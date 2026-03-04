@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
-"""Paper Analyzer v4 - Sonnet default, paper_links.txt input, MkDocs output"""
+"""
+Paper Analyzer v5
+- PDF 전체를 Claude API에 직접 전달 (1-stage, 안정적)
+- Default: pro (Opus 4.6), fallback chain
+- arXiv + Semantic Scholar API로 메타데이터 보강 (institution 포함)
+- MkDocs Material 출력
+"""
 
-import os, sys, re, json, time, argparse
+import os, sys, re, json, time, base64, argparse
 import urllib.request, urllib.parse, xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Optional
@@ -26,27 +32,17 @@ MODELS = {
         "claude-haiku-4-5-20251001",
     ],
 }
-MAX_TOK1 = 8192
-MAX_TOK2 = 4096
+MAX_TOKENS = 8192
 HTTP_TIMEOUT = 30
 
 # --- Data ---
-@dataclass
-class PaperSections:
-    abstract: str = ""
-    introduction: str = ""
-    method: str = ""
-    experiments: str = ""
-    conclusion: str = ""
-    raw_full_text: str = ""
-
 @dataclass
 class ExtractedFigure:
     image_path: str
     page_num: int
     caption: str = ""
 
-# --- State ---
+# === State ===
 def load_state():
     if STATE_FILE.exists():
         with open(STATE_FILE, "r") as f:
@@ -68,11 +64,6 @@ def title_to_slug(title):
 # =====================================================
 
 def parse_paper_links(filepath):
-    """
-    paper_links.txt 파싱.
-    한 줄에 URL 하나. '#'으로 시작하면 주석.
-    지원: arXiv URL, 직접 PDF URL
-    """
     papers = []
     with open(filepath, "r", encoding="utf-8") as f:
         for line in f:
@@ -81,21 +72,15 @@ def parse_paper_links(filepath):
                 continue
             papers.append({
                 "url": line,
-                "title": "",
-                "author": "",
-                "year": "",
-                "doi": "",
-                "journal": "",
-                "abstract": "",
-                "institution": "",
-                "pdf_path": "",
-                "arxiv_id": "",
+                "title": "", "author": "", "year": "",
+                "doi": "", "journal": "", "abstract": "",
+                "institution": "", "pdf_path": "", "arxiv_id": "",
             })
     return papers
 
 
 # =====================================================
-# arXiv API (무료 메타데이터, Claude 토큰 절감)
+# arXiv API (무료 메타데이터)
 # =====================================================
 
 def _extract_arxiv_id(text):
@@ -143,26 +128,103 @@ def fetch_arxiv_meta(arxiv_id):
         return None
 
 
+# =====================================================
+# Semantic Scholar API (institution 보강)
+# =====================================================
+
+def fetch_s2_meta(title):
+    """Semantic Scholar API로 institution 등 메타데이터 보강."""
+    if not title:
+        return None
+    query = urllib.parse.quote(title[:200])
+    url = f"https://api.semanticscholar.org/graph/v1/paper/search?query={query}&limit=1&fields=title,authors,venue,year,externalIds"
+    print(f"    S2 API: {title[:50]}...")
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "paper-analyzer/1.0"})
+        with urllib.request.urlopen(req, timeout=HTTP_TIMEOUT) as r:
+            data = json.loads(r.read().decode("utf-8"))
+        papers = data.get("data", [])
+        if not papers:
+            return None
+        p = papers[0]
+
+        # Author affiliations
+        affiliations = []
+        authors_with_aff = p.get("authors", [])
+        for a in authors_with_aff:
+            affs = a.get("affiliations", [])
+            if affs:
+                affiliations.extend(affs)
+
+        # If no affiliations in search, try paper detail
+        if not affiliations:
+            pid = p.get("paperId", "")
+            if pid:
+                detail_url = f"https://api.semanticscholar.org/graph/v1/paper/{pid}?fields=authors.affiliations"
+                try:
+                    req2 = urllib.request.Request(detail_url, headers={"User-Agent": "paper-analyzer/1.0"})
+                    with urllib.request.urlopen(req2, timeout=HTTP_TIMEOUT) as r2:
+                        detail = json.loads(r2.read().decode("utf-8"))
+                    for a in detail.get("authors", []):
+                        affs = a.get("affiliations", [])
+                        if affs:
+                            affiliations.extend(affs)
+                except Exception:
+                    pass
+
+        result = {
+            "institution": ", ".join(sorted(set(a for a in affiliations if a))),
+        }
+
+        # Also grab venue/year if available
+        if p.get("venue"):
+            result["journal"] = p["venue"]
+        if p.get("year"):
+            result["year"] = str(p["year"])
+
+        # ArXiv ID from externalIds
+        ext_ids = p.get("externalIds", {})
+        if ext_ids.get("ArXiv"):
+            result["arxiv_id"] = ext_ids["ArXiv"]
+
+        return result
+    except Exception as e:
+        print(f"    [WARN] S2 API: {e}")
+        return None
+
+
 def enrich_metadata(paper):
-    """arXiv API로 메타데이터 보강 (빈 필드만 채움)."""
+    """arXiv + Semantic Scholar API로 메타데이터 보강."""
+    # 1. arXiv ID 확보
     aid = paper.get("arxiv_id", "")
     if not aid:
         aid = _extract_arxiv_id(paper.get("url", ""))
         if aid:
             paper["arxiv_id"] = aid
-    if not aid:
-        return
-    meta = fetch_arxiv_meta(aid)
-    if not meta:
-        return
-    for k in ("title", "abstract", "author", "year", "journal", "institution", "url"):
-        if not paper.get(k) and meta.get(k):
-            paper[k] = meta[k]
-    print(f"    ✓ Metadata enriched via arXiv")
+
+    # 2. arXiv API
+    if aid:
+        meta = fetch_arxiv_meta(aid)
+        if meta:
+            for k in ("title", "abstract", "author", "year", "journal", "institution", "url"):
+                if not paper.get(k) and meta.get(k):
+                    paper[k] = meta[k]
+            print(f"    ✓ arXiv metadata enriched")
+
+    # 3. Semantic Scholar (institution 보강)
+    title = paper.get("title", "")
+    if title and not paper.get("institution"):
+        s2 = fetch_s2_meta(title)
+        if s2:
+            for k, v in s2.items():
+                if v and not paper.get(k):
+                    paper[k] = v
+            if s2.get("institution"):
+                print(f"    ✓ S2 institution: {s2['institution'][:60]}")
 
 
 # =====================================================
-# PDF Acquisition (2-step)
+# PDF Acquisition (2-step: local or download)
 # =====================================================
 
 def _download_pdf(url, dest):
@@ -182,18 +244,16 @@ def _download_pdf(url, dest):
 
 
 def acquire_pdf(paper):
-    """PDF 취득: (1) 로컬 (2) URL 다운로드 (arXiv or direct PDF)."""
     title = paper.get("title", "")
-    if not title:
-        # title 없으면 slug를 URL 기반으로
+    if title:
+        slug = title_to_slug(title)
+    else:
         aid = paper.get("arxiv_id", "") or _extract_arxiv_id(paper.get("url", ""))
         slug = aid.replace(".", "_").replace("/", "_") if aid else "unknown"
-    else:
-        slug = title_to_slug(title)
     PDFS_DIR.mkdir(parents=True, exist_ok=True)
     print(f"  PDF:")
 
-    # Step 1: 로컬
+    # Step 1: local
     lp = paper.get("pdf_path", "")
     if lp and os.path.isfile(lp):
         print(f"    ✓ Local: {lp}")
@@ -207,7 +267,7 @@ def acquire_pdf(paper):
             print(f"    ✓ Local match: {f}")
             return str(f)
 
-    # Step 2: 다운로드
+    # Step 2: download
     dest = str(PDFS_DIR / f"{slug}.pdf")
     aid = paper.get("arxiv_id", "") or _extract_arxiv_id(paper.get("url", ""))
     if aid:
@@ -216,7 +276,6 @@ def acquire_pdf(paper):
         if _download_pdf(arxiv_url, dest):
             paper["pdf_path"] = dest
             return dest
-
     url = paper.get("url", "")
     if url and url.lower().endswith(".pdf"):
         print(f"    Direct PDF: {url}")
@@ -226,129 +285,6 @@ def acquire_pdf(paper):
 
     print(f"    FAIL")
     return None
-
-
-# =====================================================
-# PDF Section Extraction
-# =====================================================
-
-_SEC_PAT = {
-    "abstract": [r"^abstract\b"],
-    "introduction": [r"^\d*\.?\s*introduction\b"],
-    "related_work": [r"^\d*\.?\s*related\s+work\b", r"^\d*\.?\s*background\b"],
-    "method": [
-        r"^\d*\.?\s*method(?:s|ology)?\b",
-        r"^\d*\.?\s*(?:proposed\s+)?(?:approach|model|framework)\b",
-        r"^\d*\.?\s*architecture\b",
-        r"^\d*\.?\s*(?:the\s+)?(?:transformer|model\s+architecture)\b",
-        r"^\d*\.?\s*(?:our\s+)?(?:approach|system|method)\b",
-        r"^\d*\.?\s*(?:technical\s+)?approach\b",
-        r"^\d*\.?\s*formulation\b",
-        r"^\d*\.?\s*(?:problem\s+)?(?:setup|formulation|definition)\b",
-        r"^\d*\.?\s*training\b",
-    ],
-    "experiments": [
-        r"^\d*\.?\s*experiment(?:s|al)?\b",
-        r"^\d*\.?\s*results?\b",
-        r"^\d*\.?\s*evaluation\b",
-        r"^\d*\.?\s*(?:results?\s+and\s+)?(?:analysis|discussion)\b",
-        r"^\d*\.?\s*(?:empirical|ablation)\b",
-        r"^\d*\.?\s*(?:why\s+)?self[- ]attention\b",
-    ],
-    "conclusion": [
-        r"^\d*\.?\s*conclusion(?:s)?\b",
-        r"^\d*\.?\s*(?:conclusion(?:s)?\s+and\s+)?future\s+work\b",
-        r"^\d*\.?\s*concluding\s+remarks?\b",
-        r"^\d*\.?\s*summary\b",
-    ],
-}
-
-
-def _classify(heading):
-    h = heading.lower().strip()
-    for k, pats in _SEC_PAT.items():
-        for p in pats:
-            if re.search(p, h):
-                return k
-    return "other"
-
-
-def extract_sections(pdf_path):
-    if not pdf_path or not os.path.isfile(pdf_path):
-        return None
-    try:
-        import fitz
-    except ImportError:
-        print("  [WARN] PyMuPDF not installed")
-        return None
-    try:
-        doc = fitz.open(pdf_path)
-        ft = "".join(p.get_text("text") + "\n" for p in doc)
-        doc.close()
-    except Exception as e:
-        print(f"  [WARN] PDF read: {e}")
-        return None
-    if not ft.strip():
-        return None
-
-    sec = PaperSections(raw_full_text=ft)
-    lines = ft.split("\n")
-    segs = []
-    for i, l in enumerate(lines):
-        s = l.strip()
-        if not s or len(s) > 120:
-            continue
-        # Heading detection: multiple formats
-        is_heading = False
-        # "3 Model Architecture", "3. Model Architecture"
-        if re.match(r"^\d+\.?\s+[A-Z]", s):
-            is_heading = True
-        # "III. Results", "IV Model"
-        elif re.match(r"^[IVXLC]+\.?\s+[A-Z]", s):
-            is_heading = True
-        # "ALL CAPS HEADING" (max 8 words)
-        elif s.isupper() and 1 <= len(s.split()) <= 8:
-            is_heading = True
-        # "Abstract", "Introduction", "Conclusion" standalone
-        elif re.match(r"^(?:Abstract|Introduction|Conclusion|Discussion|References)\s*$", s, re.IGNORECASE):
-            is_heading = True
-        # "3.1 Encoder and Decoder Stacks" (subsection)
-        elif re.match(r"^\d+\.\d+\.?\s+[A-Z]", s):
-            # subsections -> classify parent section
-            is_heading = True
-
-        if is_heading:
-            segs.append((_classify(s), i))
-
-    for idx, (k, st) in enumerate(segs):
-        end = segs[idx + 1][1] if idx + 1 < len(segs) else len(lines)
-        blk = "\n".join(lines[st:end]).strip()
-        if k == "abstract":
-            sec.abstract = blk
-        elif k == "introduction":
-            sec.introduction = blk
-        elif k == "method":
-            sec.method = blk
-        elif k == "experiments":
-            sec.experiments = blk
-        elif k == "conclusion":
-            sec.conclusion = blk
-
-    # Fallback
-    if not sec.abstract:
-        m = re.search(
-            r"(?:^|\n)\s*(?:Abstract|ABSTRACT)\s*\n(.*?)(?=\n\s*\d*\.?\s*(?:Introduction|INTRODUCTION|1\s))",
-            ft, re.DOTALL)
-        if m:
-            sec.abstract = m.group(1).strip()
-    if not sec.conclusion:
-        m = re.search(
-            r"(?:^|\n)\s*\d*\.?\s*(?:Conclusion|CONCLUSION)\b.*?\n(.*?)(?=\n\s*(?:References|REFERENCES|\[1\]))",
-            ft, re.DOTALL)
-        if m:
-            sec.conclusion = m.group(1).strip()
-
-    return sec
 
 
 # =====================================================
@@ -402,23 +338,10 @@ def extract_figures(pdf_path, slug):
 
 
 # =====================================================
-# Helpers
-# =====================================================
-
-def _trunc(text, max_tok=6000):
-    mc = max_tok * 4
-    if len(text) <= mc:
-        return text
-    f = int(mc * 0.6)
-    b = int(mc * 0.4)
-    return text[:f] + "\n\n[... truncated ...]\n\n" + text[-b:]
-
-
-# =====================================================
 # Claude API
 # =====================================================
 
-def call_claude(client, msgs, sys_prompt, chain, max_tok=MAX_TOK1):
+def call_claude(client, msgs, sys_prompt, chain, max_tok=MAX_TOKENS):
     """Returns (response_text, model_used)."""
     for model in chain:
         try:
@@ -449,110 +372,97 @@ def call_claude(client, msgs, sys_prompt, chain, max_tok=MAX_TOK1):
 
 
 # =====================================================
-# Prompts
+# Prompt (1-stage, PDF 전체)
 # =====================================================
 
-SYS_STAGE1 = """You are an expert academic paper analyzer.
-You receive extracted sections from a paper. Produce a structured summary.
+SYSTEM_PROMPT = """You are an expert academic paper analyzer.
+You receive a full PDF of an academic paper. Analyze the entire paper and produce a structured summary.
 
 RULES:
 - Write in Korean. Keep technical terms in English (RAG, TTS, SOTA, fine-tuning, transformer, benchmark, etc.)
 - Do NOT produce an Abstract section (it is inserted separately from arXiv metadata).
-- If information is insufficient, write "정보 부족".
+- If information is insufficient for a section, write "정보 부족".
+- Be specific: include exact numbers, dataset names, model names, and comparison results.
 
 OUTPUT FORMAT (follow exactly):
 
 ### 1. Abstract 요약
-[Synthesize abstract + introduction + conclusion into Korean summary]
+[Synthesize the paper's core contribution and findings into a Korean summary paragraph]
 
 ### 2. 한 줄 핵심 요약
-[One-line core summary]
+[One-line core summary of the paper]
 
 ### 3. Contribution
-[Key contributions]
+[List the key contributions of this paper]
 
 ### 4. Methods
 #### 핵심 아이디어
+[Core idea / motivation]
 #### 모델 구조
+[Architecture details]
 #### 데이터셋
+[Datasets used]
 #### 평가방법
+[Evaluation metrics]
 #### 실험 결과
+[Key experimental results with numbers]
 
 ### 5. Findings
 #### Objective Evaluations
+[Quantitative results, benchmarks, comparisons]
 #### Subjective Evaluations
+[Qualitative analysis, case studies, human evaluation if any]
 
 ### 6. Notes
 #### 의미
+[Significance and impact]
 #### 한계
+[Limitations]
 #### 코드/데모
+[Code/demo links if mentioned in the paper]
 """
 
-SYS_STAGE2 = """You are refining a paper summary. You receive:
-1) A draft summary
-2) Detailed Experiments/Results text
 
-ENHANCE: Fill in sections marked "정보 부족" and add specific numbers and comparisons.
-Write in Korean. Keep technical terms in English. Keep exact same markdown structure.
-Output the COMPLETE updated summary (all sections)."""
+def build_message_with_pdf(paper, pdf_path):
+    """PDF를 base64로 인코딩하여 Claude API 메시지 구성."""
+    with open(pdf_path, "rb") as f:
+        pdf_data = base64.standard_b64encode(f.read()).decode("utf-8")
 
-
-# =====================================================
-# Stage builders
-# =====================================================
-
-def build_stage1_msg(paper, sec):
-    parts = [
-        f"## Metadata",
-        f"- Title: {paper.get('title', '')}",
-        f"- Authors: {paper.get('author', '')}",
-        f"- Year: {paper.get('year', '')}",
-        f"- Venue: {paper.get('journal', '')}",
-        "",
+    content = [
+        {
+            "type": "document",
+            "source": {
+                "type": "base64",
+                "media_type": "application/pdf",
+                "data": pdf_data,
+            },
+        },
+        {
+            "type": "text",
+            "text": (
+                f"Analyze this paper.\n"
+                f"Title: {paper.get('title', 'Unknown')}\n"
+                f"Authors: {paper.get('author', 'Unknown')}\n"
+                f"Year: {paper.get('year', '')}\n"
+                f"Venue: {paper.get('journal', '')}\n"
+            ),
+        },
     ]
-    if sec:
-        for name, text, limit in [
-            ("Abstract", sec.abstract or paper.get("abstract", ""), 2000),
-            ("Introduction", sec.introduction, 4000),
-            ("Method", sec.method, 4000),
-            ("Experiments", sec.experiments, 3000),
-            ("Conclusion", sec.conclusion, 2000),
-        ]:
-            if text:
-                parts.append(f"## {name}")
-                parts.append(_trunc(text, limit))
-                parts.append("")
-    else:
-        ab = paper.get("abstract", "")
-        if ab:
-            parts.append(f"## Abstract")
-            parts.append(ab)
-        parts.append("\n(metadata only)")
-    return "\n".join(parts)
-
-
-def build_stage2_msg(draft, sec):
-    parts = [f"## Draft\n{draft}\n\n---\n## Experiments detail\n"]
-    if sec.experiments:
-        parts.append(_trunc(sec.experiments, 8000))
-    if sec.method:
-        parts.append(f"\n## Method detail\n{_trunc(sec.method, 6000)}")
-    parts.append("\n\nPlease enhance the draft with specific numbers and details.")
-    return "\n".join(parts)
+    return [{"role": "user", "content": content}]
 
 
 # =====================================================
 # Markdown Assembly
 # =====================================================
 
-def assemble_md(paper, abstract, summary, figures, stage1_only, model_used):
+def assemble_md(paper, abstract, summary, figures, model_used):
     title = paper.get("title", "Unknown")
+    institution = paper.get("institution", "")
     md = [f"# {title}\n"]
-    if stage1_only:
-        md.append("!!! warning \"Stage 1 only\"\n    Stage 2 refinement was not performed. Methods/Findings may be limited.\n")
     md.append(f"**Link**: {paper.get('url', 'N/A')}  ")
     md.append(f"**Authors**: {paper.get('author', 'Unknown')}  ")
-    md.append(f"**Institution**: {paper.get('institution', 'Unknown')}  ")
+    if institution:
+        md.append(f"**Institution**: {institution}  ")
     md.append(f"**Venue**: {paper.get('journal', 'Unknown')} ({paper.get('year', '')})  ")
     md.append(f"**Model**: `{model_used}`\n")
     md.append("---\n## Abstract\n")
@@ -585,8 +495,8 @@ def assemble_missing_md(paper):
 # Main Processing
 # =====================================================
 
-def process_paper(client, paper, state, tier="free", force=False):
-    # Enrich metadata first (needed for title/slug)
+def process_paper(client, paper, state, tier="pro", force=False):
+    # Enrich metadata first
     enrich_metadata(paper)
 
     title = paper.get("title", "")
@@ -595,7 +505,6 @@ def process_paper(client, paper, state, tier="free", force=False):
         print("  [SKIP] No title or URL")
         return "failed"
 
-    # slug: title-based if available, else arxiv-id or url hash
     if title:
         slug = title_to_slug(title)
     else:
@@ -633,73 +542,33 @@ def process_paper(client, paper, state, tier="free", force=False):
             f.write(assemble_missing_md(paper))
         return "missing_pdf"
 
-    # --- Sections ---
-    sec = extract_sections(pdf)
-    if sec:
-        found = []
-        if sec.abstract: found.append("abstract")
-        if sec.introduction: found.append("intro")
-        if sec.method: found.append("method")
-        if sec.experiments: found.append("experiments")
-        if sec.conclusion: found.append("conclusion")
-        print(f"  Sections: {len(found)}/5 [{', '.join(found)}]")
-        if not found:
-            print(f"  [WARN] No sections detected - Stage 2 will be skipped")
-    else:
-        print(f"  [WARN] Section extraction returned None")
-
     # --- Figures ---
     figs = extract_figures(pdf, slug)
     if figs:
         print(f"  Figures: {len(figs)}")
 
-    # --- Abstract ---
+    # --- Abstract (from arXiv, not Claude) ---
     abstract = paper.get("abstract", "")
-    if not abstract and sec and sec.abstract:
-        abstract = sec.abstract
 
-    # --- Claude ---
-    chain = MODELS.get(tier, MODELS["free"])
+    # --- Claude: PDF 전체 1-stage ---
+    chain = MODELS.get(tier, MODELS["pro"])
 
-    print(f"\n  Stage 1 ({tier})...")
-    s1 = build_stage1_msg(paper, sec)
-    draft, m1 = call_claude(
-        client, [{"role": "user", "content": s1}],
-        SYS_STAGE1, chain, MAX_TOK1,
-    )
-    if not draft and tier == "pro":
+    print(f"\n  Analyzing ({tier})...")
+    msgs = build_message_with_pdf(paper, pdf)
+    summary, model_used = call_claude(client, msgs, SYSTEM_PROMPT, chain, MAX_TOKENS)
+
+    if not summary and tier == "pro":
         print(f"  Pro failed, falling back to free...")
         chain = MODELS["free"]
-        draft, m1 = call_claude(
-            client, [{"role": "user", "content": s1}],
-            SYS_STAGE1, chain, MAX_TOK1,
-        )
-    if not draft:
+        summary, model_used = call_claude(client, msgs, SYSTEM_PROMPT, chain, MAX_TOKENS)
+
+    if not summary:
         state[slug] = {"status": "failed", "title": title}
         save_state(state)
         return "failed"
 
-    final, model_used = draft, m1
-    stage1_only = True
-
-    if sec and (sec.experiments or sec.method):
-        print(f"\n  Stage 2...")
-        s2 = build_stage2_msg(draft, sec)
-        ref, m2 = call_claude(
-            client, [{"role": "user", "content": s2}],
-            SYS_STAGE2, chain, MAX_TOK2,
-        )
-        if ref:
-            final, model_used = ref, m2
-            stage1_only = False
-            print(f"    Done")
-        else:
-            print(f"    Stage 2 failed, using Stage 1")
-    else:
-        print(f"  [SKIP] Stage 2 - insufficient sections")
-
     # --- Save ---
-    md = assemble_md(paper, abstract, final, figs, stage1_only, model_used)
+    md = assemble_md(paper, abstract, summary, figs, model_used)
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     with open(out, "w") as f:
         f.write(md)
@@ -708,7 +577,6 @@ def process_paper(client, paper, state, tier="free", force=False):
         "status": "done",
         "title": title,
         "model": model_used,
-        "stage1_only": stage1_only,
     }
     save_state(state)
     print(f"\n  Saved: {out}")
@@ -720,15 +588,12 @@ def process_paper(client, paper, state, tier="free", force=False):
 # =====================================================
 
 def main():
-    ap = argparse.ArgumentParser(description="Paper Analyzer v4")
-    ap.add_argument("--input", "-i", default="inputs/paper_links.txt",
-                    help="Input file (default: inputs/paper_links.txt)")
-    ap.add_argument("--force", "-f", action="store_true",
-                    help="Force re-analysis")
-    ap.add_argument("--tier", "-t", choices=["free", "pro"], default="free",
-                    help="Model tier: free=Sonnet (default), pro=Opus")
-    ap.add_argument("--paper", "-p", default=None,
-                    help="Process specific paper (title/URL substring match)")
+    ap = argparse.ArgumentParser(description="Paper Analyzer v5")
+    ap.add_argument("--input", "-i", default="inputs/paper_links.txt")
+    ap.add_argument("--force", "-f", action="store_true")
+    ap.add_argument("--tier", "-t", choices=["free", "pro"], default="pro",
+                    help="Model tier: pro=Opus (default), free=Sonnet")
+    ap.add_argument("--paper", "-p", default=None)
     args = ap.parse_args()
 
     key = os.environ.get("ANTHROPIC_API_KEY")
@@ -740,8 +605,7 @@ def main():
 
     inp = args.input
     if not os.path.isfile(inp):
-        # Auto-detect
-        for ext in ("*.txt", "*.bib", "*.csv"):
+        for ext in ("*.txt",):
             found = list(INPUTS_DIR.glob(ext))
             if found:
                 inp = str(found[0])
@@ -750,14 +614,7 @@ def main():
             print(f"ERROR: {inp} not found")
             sys.exit(1)
 
-    # Parse based on extension
-    ext = Path(inp).suffix.lower()
-    if ext == ".txt":
-        papers = parse_paper_links(inp)
-    else:
-        print(f"ERROR: Only .txt (paper_links.txt) supported. Got: {ext}")
-        sys.exit(1)
-
+    papers = parse_paper_links(inp)
     if not papers:
         print("No papers found.")
         sys.exit(0)
