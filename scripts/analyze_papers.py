@@ -240,15 +240,26 @@ _SEC_PAT = {
         r"^\d*\.?\s*method(?:s|ology)?\b",
         r"^\d*\.?\s*(?:proposed\s+)?(?:approach|model|framework)\b",
         r"^\d*\.?\s*architecture\b",
+        r"^\d*\.?\s*(?:the\s+)?(?:transformer|model\s+architecture)\b",
+        r"^\d*\.?\s*(?:our\s+)?(?:approach|system|method)\b",
+        r"^\d*\.?\s*(?:technical\s+)?approach\b",
+        r"^\d*\.?\s*formulation\b",
+        r"^\d*\.?\s*(?:problem\s+)?(?:setup|formulation|definition)\b",
+        r"^\d*\.?\s*training\b",
     ],
     "experiments": [
         r"^\d*\.?\s*experiment(?:s|al)?\b",
         r"^\d*\.?\s*results?\b",
         r"^\d*\.?\s*evaluation\b",
+        r"^\d*\.?\s*(?:results?\s+and\s+)?(?:analysis|discussion)\b",
+        r"^\d*\.?\s*(?:empirical|ablation)\b",
+        r"^\d*\.?\s*(?:why\s+)?self[- ]attention\b",
     ],
     "conclusion": [
         r"^\d*\.?\s*conclusion(?:s)?\b",
-        r"^\d*\.?\s*discussion\b",
+        r"^\d*\.?\s*(?:conclusion(?:s)?\s+and\s+)?future\s+work\b",
+        r"^\d*\.?\s*concluding\s+remarks?\b",
+        r"^\d*\.?\s*summary\b",
     ],
 }
 
@@ -287,9 +298,26 @@ def extract_sections(pdf_path):
         s = l.strip()
         if not s or len(s) > 120:
             continue
-        if (re.match(r"^\d+\.?\s+[A-Z]", s) or
-                re.match(r"^[IVXLC]+\.?\s+[A-Z]", s) or
-                (s.isupper() and len(s.split()) <= 6)):
+        # Heading detection: multiple formats
+        is_heading = False
+        # "3 Model Architecture", "3. Model Architecture"
+        if re.match(r"^\d+\.?\s+[A-Z]", s):
+            is_heading = True
+        # "III. Results", "IV Model"
+        elif re.match(r"^[IVXLC]+\.?\s+[A-Z]", s):
+            is_heading = True
+        # "ALL CAPS HEADING" (max 8 words)
+        elif s.isupper() and 1 <= len(s.split()) <= 8:
+            is_heading = True
+        # "Abstract", "Introduction", "Conclusion" standalone
+        elif re.match(r"^(?:Abstract|Introduction|Conclusion|Discussion|References)\s*$", s, re.IGNORECASE):
+            is_heading = True
+        # "3.1 Encoder and Decoder Stacks" (subsection)
+        elif re.match(r"^\d+\.\d+\.?\s+[A-Z]", s):
+            # subsections -> classify parent section
+            is_heading = True
+
+        if is_heading:
             segs.append((_classify(s), i))
 
     for idx, (k, st) in enumerate(segs):
@@ -519,9 +547,9 @@ def build_stage2_msg(draft, sec):
 
 def assemble_md(paper, abstract, summary, figures, stage1_only, model_used):
     title = paper.get("title", "Unknown")
-    md = [f"---\n# {title}\n"]
+    md = [f"# {title}\n"]
     if stage1_only:
-        md.append("> :warning: **Stage 1 only** - Stage 2 refinement was not performed.\n")
+        md.append("!!! warning \"Stage 1 only\"\n    Stage 2 refinement was not performed. Methods/Findings may be limited.\n")
     md.append(f"**Link**: {paper.get('url', 'N/A')}  ")
     md.append(f"**Authors**: {paper.get('author', 'Unknown')}  ")
     md.append(f"**Institution**: {paper.get('institution', 'Unknown')}  ")
@@ -546,9 +574,9 @@ def assemble_missing_md(paper):
     title = paper.get("title", paper.get("url", "Unknown"))
     url = paper.get("url", "N/A")
     return (
-        f"---\n# {title}\n\n"
-        f"> :x: **PDF not found - analysis skipped**\n>\n"
-        f"> Add PDF to `inputs/pdfs/` or check the URL, then re-run.\n\n"
+        f"# {title}\n\n"
+        f"!!! failure \"PDF not found\"\n"
+        f"    Add PDF to `inputs/pdfs/` or check the URL, then re-run.\n\n"
         f"**Link**: {url}\n\n---\n(waiting for PDF)\n"
     )
 
@@ -608,9 +636,17 @@ def process_paper(client, paper, state, tier="free", force=False):
     # --- Sections ---
     sec = extract_sections(pdf)
     if sec:
-        n = sum(1 for s in [sec.abstract, sec.introduction, sec.method,
-                             sec.experiments, sec.conclusion] if s)
-        print(f"  Sections: {n}/5")
+        found = []
+        if sec.abstract: found.append("abstract")
+        if sec.introduction: found.append("intro")
+        if sec.method: found.append("method")
+        if sec.experiments: found.append("experiments")
+        if sec.conclusion: found.append("conclusion")
+        print(f"  Sections: {len(found)}/5 [{', '.join(found)}]")
+        if not found:
+            print(f"  [WARN] No sections detected - Stage 2 will be skipped")
+    else:
+        print(f"  [WARN] Section extraction returned None")
 
     # --- Figures ---
     figs = extract_figures(pdf, slug)
