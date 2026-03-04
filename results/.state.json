@@ -2,7 +2,11 @@
   "attention_is_all_you_need": {
     "status": "done",
     "title": "Attention Is All You Need",
-    "model": "claude-sonnet-4-5-20250929",
-    "stage1_only": true
+    "model": "claude-opus-4-6"
+  },
+  "qwen3-tts_technical_report": {
+    "status": "done",
+    "title": "Qwen3-TTS Technical Report",
+    "model": "claude-opus-4-6"
   }
 }
