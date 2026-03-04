@@ -1,0 +1,863 @@
+
+<!doctype html>
+<html lang="ko" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-powered paper analysis">
+      
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+    
+    
+      
+        <title>Attention Is All You Need - Paper Archive</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans KR";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#attention-is-all-you-need" class="md-skip">
+          콘텐츠로 이동
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="상단/헤더">
+    <a href="../.." title="Paper Archive" class="md-header__button md-logo" aria-label="Paper Archive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Paper Archive
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Attention Is All You Need
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="검색" placeholder="검색" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="검색">
+        
+        <button type="reset" class="md-search__icon md-icon" title="지우기" aria-label="지우기" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            검색 초기화
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="탭" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../archived/attention/" class="md-tabs__link">
+          
+  
+  
+  Papers
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="네비게이션" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Paper Archive" class="md-nav__button md-logo" aria-label="Paper Archive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Paper Archive
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Papers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Papers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../archived/attention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Attention Is All You Need
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="목차">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      목차
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#abstract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Abstract
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-abstract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Abstract 요약
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 한 줄 핵심 요약
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-contribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Contribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        핵심 아이디어
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        모델 구조
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        데이터셋
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        평가방법
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        실험 결과
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Findings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Findings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#objective-evaluations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objective Evaluations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subjective-evaluations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Subjective Evaluations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Notes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Notes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        의미
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        한계
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        코드/데모
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-figurestables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Figures/Tables
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="attention-is-all-you-need">Attention Is All You Need<a class="headerlink" href="#attention-is-all-you-need" title="Permanent link">&para;</a></h1>
+<p><strong>Link</strong>: https://arxiv.org/abs/1706.03762<br />
+<strong>Authors</strong>: Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, Illia Polosukhin<br />
+<strong>Venue</strong>: arXiv:1706.03762 [cs.CL] (2017)<br />
+<strong>Model</strong>: <code>claude-opus-4-6</code></p>
+<hr />
+<h2 id="abstract">Abstract<a class="headerlink" href="#abstract" title="Permanent link">&para;</a></h2>
+<p>The dominant sequence transduction models are based on complex recurrent or convolutional neural networks in an encoder-decoder configuration. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks show these models to be superior in quality while being more parallelizable and requiring significantly less time to train. Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over the existing best results, including ensembles by over 2 BLEU. On the WMT 2014 English-to-French translation task, our model establishes a new single-model state-of-the-art BLEU score of 41.8 after training for 3.5 days on eight GPUs, a small fraction of the training costs of the best models from the literature. We show that the Transformer generalizes well to other tasks by applying it successfully to English constituency parsing both with large and limited training data.</p>
+<hr />
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<h3 id="1-abstract">1. Abstract 요약<a class="headerlink" href="#1-abstract" title="Permanent link">&para;</a></h3>
+<p>본 논문은 기존의 sequence transduction 모델이 의존하던 recurrence와 convolution을 완전히 배제하고, attention mechanism만으로 구성된 새로운 네트워크 아키텍처인 Transformer를 제안한다. Transformer는 encoder-decoder 구조를 따르되, multi-head self-attention과 position-wise feed-forward network로 구성되어 병렬화가 크게 향상되고 학습 시간이 대폭 단축된다. WMT 2014 영어-독일어 번역에서 28.4 BLEU로 기존 최고 성능(앙상블 포함)을 2 BLEU 이상 능가하였고, 영어-프랑스어 번역에서는 8개 GPU로 3.5일 학습만으로 41.8 BLEU의 새로운 single-model SOTA를 달성하였다. 또한 English constituency parsing에서도 우수한 일반화 성능을 보여 Transformer의 범용성을 입증하였다.</p>
+<h3 id="2">2. 한 줄 핵심 요약<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
+<p>Recurrence와 convolution 없이 self-attention만으로 구성된 Transformer 아키텍처를 제안하여 기계 번역에서 SOTA 성능을 달성하면서 학습 비용을 대폭 절감하였다.</p>
+<h3 id="3-contribution">3. Contribution<a class="headerlink" href="#3-contribution" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>최초의 순수 attention 기반 sequence transduction 모델</strong>: RNN이나 CNN 없이 오직 self-attention mechanism만으로 encoder-decoder 모델을 구성한 최초의 아키텍처 (Transformer) 제안</li>
+<li><strong>Scaled Dot-Product Attention 및 Multi-Head Attention 도입</strong>: dot-product attention에 √d_k 스케일링을 적용하고, 여러 attention head를 병렬로 수행하여 서로 다른 representation subspace의 정보를 동시에 학습</li>
+<li><strong>높은 병렬화와 학습 효율성</strong>: 기존 RNN 기반 모델 대비 훨씬 적은 학습 비용으로 (8 GPU, 3.5일) SOTA 달성</li>
+<li><strong>기계 번역에서의 새로운 SOTA</strong>: WMT 2014 EN-DE 28.4 BLEU, EN-FR 41.8 BLEU</li>
+<li><strong>우수한 일반화 성능 입증</strong>: English constituency parsing에서 task-specific tuning 없이도 경쟁력 있는 결과 달성</li>
+</ul>
+<h3 id="4-methods">4. Methods<a class="headerlink" href="#4-methods" title="Permanent link">&para;</a></h3>
+<h4 id="_1">핵심 아이디어<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h4>
+<p>기존 sequence transduction 모델의 RNN 기반 순차 연산은 병렬화를 제한하고 장거리 의존성 학습을 어렵게 만든다. Self-attention은 시퀀스 내 임의의 두 위치를 O(1) 연산으로 연결할 수 있어 이 문제를 해결한다. 이 핵심 관찰에 기반하여 recurrence를 완전히 제거하고 attention만으로 입출력 간 global dependency를 모델링하는 Transformer를 설계하였다.</p>
+<h4 id="_2">모델 구조<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Encoder</strong>: N=6개의 동일한 레이어 스택. 각 레이어는 (1) multi-head self-attention, (2) position-wise feed-forward network의 2개 sub-layer로 구성. 각 sub-layer에 residual connection + layer normalization 적용. d_model = 512.</li>
+<li><strong>Decoder</strong>: N=6개의 동일한 레이어 스택. Encoder와 동일한 2개 sub-layer에 추가로 encoder 출력에 대한 multi-head attention sub-layer 삽입 (총 3개 sub-layer). Decoder의 self-attention에는 미래 위치를 참조하지 못하도록 masking 적용.</li>
+<li><strong>Scaled Dot-Product Attention</strong>: Attention(Q,K,V) = softmax(QK^T/√d_k)V. √d_k로 스케일링하여 큰 d_k에서 softmax의 gradient vanishing 방지.</li>
+<li><strong>Multi-Head Attention</strong>: h=8개의 병렬 attention head 사용. d_k = d_v = d_model/h = 64. 각 head의 출력을 concatenate 후 linear projection.</li>
+<li><strong>Position-wise FFN</strong>: 2층 fully connected (d_ff = 2048), ReLU 활성 함수.</li>
+<li><strong>Positional Encoding</strong>: 순서 정보를 위해 sine/cosine 함수 기반 positional encoding을 embedding에 더함.</li>
+<li><strong>Embedding 공유</strong>: 입력/출력 embedding과 pre-softmax linear transformation의 가중치 행렬 공유.</li>
+</ul>
+<h4 id="_3">데이터셋<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>WMT 2014 English-German</strong>: 약 450만 문장 쌍, byte-pair encoding (약 37,000 토큰 공유 vocabulary)</li>
+<li><strong>WMT 2014 English-French</strong>: 약 3,600만 문장, 32,000 word-piece vocabulary</li>
+<li><strong>Penn Treebank (WSJ)</strong>: English constituency parsing용, 약 40K 학습 문장 (WSJ only) 및 약 17M 문장 (semi-supervised)</li>
+</ul>
+<h4 id="_4">평가방법<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>BLEU score</strong>: 기계 번역 품질 평가 (newstest2014 테스트셋)</li>
+<li><strong>Training cost (FLOPs)</strong>: 학습 효율성 비교</li>
+<li><strong>Perplexity (PPL)</strong>: development set에서 모델 변형 실험 평가</li>
+<li><strong>F1 score</strong>: English constituency parsing (WSJ Section 23)</li>
+</ul>
+<h4 id="_5">실험 결과<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>EN-DE 번역</strong>: Transformer (big) 28.4 BLEU — 기존 최고 앙상블(GNMT+RL Ensemble 26.30) 대비 +2.1 BLEU 향상. Training cost 2.3×10^19 FLOPs (앙상블의 1/8 수준).</li>
+<li><strong>EN-FR 번역</strong>: Transformer (big) 41.8 BLEU — 기존 single-model SOTA 대비 최고 성능. 학습 비용은 이전 SOTA의 1/4 이하.</li>
+<li><strong>Base model</strong>: EN-DE 27.3 BLEU (training cost 3.3×10^18 FLOPs만으로 기존 모든 single model 및 앙상블 능가)</li>
+<li><strong>Ablation study (Table 3)</strong>: single-head attention은 best setting 대비 0.9 BLEU 하락; d_k 축소 시 성능 저하; 모델 크기 증가와 dropout이 성능에 중요; sinusoidal vs learned positional encoding은 거의 동일 성능.</li>
+<li><strong>English constituency parsing</strong>: WSJ only에서 91.3 F1 (Dyer et al. 91.7에 근접), semi-supervised에서 92.7 F1 (기존 대부분 모델 상회).</li>
+</ul>
+<h3 id="5-findings">5. Findings<a class="headerlink" href="#5-findings" title="Permanent link">&para;</a></h3>
+<h4 id="objective-evaluations">Objective Evaluations<a class="headerlink" href="#objective-evaluations" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>모델</th>
+<th>EN-DE BLEU</th>
+<th>EN-FR BLEU</th>
+<th>Training FLOPs (EN-DE)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GNMT+RL Ensemble</td>
+<td>26.30</td>
+<td>41.16</td>
+<td>1.8×10^20</td>
+</tr>
+<tr>
+<td>ConvS2S Ensemble</td>
+<td>26.36</td>
+<td>41.29</td>
+<td>7.7×10^19</td>
+</tr>
+<tr>
+<td><strong>Transformer (base)</strong></td>
+<td><strong>27.3</strong></td>
+<td><strong>38.1</strong></td>
+<td><strong>3.3×10^18</strong></td>
+</tr>
+<tr>
+<td><strong>Transformer (big)</strong></td>
+<td><strong>28.4</strong></td>
+<td><strong>41.8</strong></td>
+<td><strong>2.3×10^19</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Self-attention의 레이어당 계산 복잡도는 O(n²·d)이지만, 순차 연산은 O(1)이고 maximum path length도 O(1)로, RNN의 O(n)이나 CNN의 O(log_k(n))보다 장거리 의존성 학습에 유리</li>
+<li>8-head attention이 최적이며, head 수가 너무 적거나(1) 많으면(32) 성능 하락</li>
+<li>큰 모델(d_model=1024, d_ff=4096, h=16, 213M params)이 base model(65M params) 대비 우수</li>
+</ul>
+<h4 id="subjective-evaluations">Subjective Evaluations<a class="headerlink" href="#subjective-evaluations" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Attention visualization 분석: encoder self-attention의 개별 head가 서로 다른 언어적 과업을 수행함을 확인</li>
+<li>장거리 의존성 포착 (예: 'making...more difficult' 구문에서 'making'이 'more difficult'에 attend)</li>
+<li>대용어 해결 (anaphora resolution): 'its'가 'Law'에 정확히 attend하는 패턴 관찰</li>
+<li>문장 구조와 관련된 attention 패턴 (구문적/의미적 구조 반영)</li>
+<li>이러한 결과는 self-attention이 더 해석 가능한 모델을 만들 수 있음을 시사</li>
+</ul>
+<h3 id="6-notes">6. Notes<a class="headerlink" href="#6-notes" title="Permanent link">&para;</a></h3>
+<h4 id="_6">의미<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>딥러닝 역사의 전환점</strong>: Transformer는 이후 BERT, GPT, T5, ViT 등 거의 모든 현대 딥러닝 아키텍처의 기초가 되어, NLP는 물론 computer vision, speech, multimodal AI 전반에 혁명적 영향을 미침</li>
+<li>Self-attention만으로 RNN을 완전히 대체할 수 있음을 최초로 실증적으로 증명하여, 시퀀스 모델링의 패러다임을 근본적으로 변화시킴</li>
+<li>병렬화 가능성과 학습 효율성을 동시에 확보하여, 이후 대규모 언어 모델(LLM) 학습의 기반을 마련</li>
+</ul>
+<h4 id="_7">한계<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Self-attention의 O(n²) 복잡도로 인해 매우 긴 시퀀스(이미지, 오디오, 비디오 등)에 대한 직접 적용이 어려움 (저자들도 restricted self-attention을 향후 연구로 언급)</li>
+<li>위치 정보를 sinusoidal encoding으로만 주입하여, 상대적 위치 관계의 명시적 모델링이 부족</li>
+<li>기계 번역과 constituency parsing 두 가지 과업에서만 검증되어, 당시 기준으로 범용성 검증이 제한적</li>
+<li>Auto-regressive decoding의 순차적 특성은 여전히 잔존 (생성 시 병렬화 미해결)</li>
+</ul>
+<h4 id="_8">코드/데모<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h4>
+<ul>
+<li>학습 및 평가 코드: https://github.com/tensorflow/tensor2tensor</li>
+</ul>
+<hr />
+<h3 id="7-figurestables">7. Figures/Tables<a class="headerlink" href="#7-figurestables" title="Permanent link">&para;</a></h3>
+<p><strong>Figure 1: The Transformer - model architecture.</strong></p>
+<p><img alt="Figure 1: The Transformer - model architecture." src="../figures/attention_is_all_you_need/fig_p3_0.png" /></p>
+<p><strong>Figure 2: (left) Scaled Dot-Product Attention. (right) Multi-Head Attention consists of several</strong></p>
+<p><img alt="Figure 2: (left) Scaled Dot-Product Attention. (right) Multi-Head Attention consists of several" src="../figures/attention_is_all_you_need/fig_p4_1.png" /></p>
+<p><strong>(p.4)</strong></p>
+<p><img alt="(p.4)" src="../figures/attention_is_all_you_need/fig_p4_2.png" /></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  맨위로
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\ud074\ub9bd\ubcf4\ub4dc\uc5d0 \ubcf5\uc0ac\ub428", "clipboard.copy": "\ud074\ub9bd\ubcf4\ub4dc\ub85c \ubcf5\uc0ac", "search.result.more.one": "\uc774 \ubb38\uc11c\uc5d0\uc11c 1\uac1c\uc758 \uac80\uc0c9 \uacb0\uacfc \ub354 \ubcf4\uae30", "search.result.more.other": "\uc774 \ubb38\uc11c\uc5d0\uc11c #\uac1c\uc758 \uac80\uc0c9 \uacb0\uacfc \ub354 \ubcf4\uae30", "search.result.none": "\uac80\uc0c9\uc5b4\uc640 \uc77c\uce58\ud558\ub294 \ubb38\uc11c\uac00 \uc5c6\uc2b5\ub2c8\ub2e4", "search.result.one": "1\uac1c\uc758 \uc77c\uce58\ud558\ub294 \ubb38\uc11c", "search.result.other": "#\uac1c\uc758 \uc77c\uce58\ud558\ub294 \ubb38\uc11c", "search.result.placeholder": "\uac80\uc0c9\uc5b4\ub97c \uc785\ub825\ud558\uc138\uc694", "search.result.term.missing": "\ud3ec\ud568\ub418\uc9c0 \uc54a\uc740 \uac80\uc0c9\uc5b4", "select.version": "\ubc84\uc804 \uc120\ud0dd"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
