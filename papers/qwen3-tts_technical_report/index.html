@@ -1,0 +1,1168 @@
+
+<!doctype html>
+<html lang="ko" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AI-powered paper analysis">
+      
+      
+      
+      
+        <link rel="prev" href="../..">
+      
+      
+        <link rel="next" href="../attention_is_all_you_need/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+    
+    
+      
+        <title>Qwen3-TTS Technical Report - Paper Archive</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans KR";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#qwen3-tts-technical-report" class="md-skip">
+          콘텐츠로 이동
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="상단/헤더">
+    <a href="../.." title="Paper Archive" class="md-header__button md-logo" aria-label="Paper Archive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Paper Archive
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Qwen3-TTS Technical Report
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="검색" placeholder="검색" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="검색">
+        
+        <button type="reset" class="md-search__icon md-icon" title="지우기" aria-label="지우기" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            검색 초기화
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="탭" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Papers
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="네비게이션" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Paper Archive" class="md-nav__button md-logo" aria-label="Paper Archive" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Paper Archive
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Papers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Papers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Qwen3-TTS Technical Report
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Qwen3-TTS Technical Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="목차">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      목차
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#abstract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Abstract
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-abstract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Abstract 요약
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 한 줄 핵심 요약
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-contribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Contribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        핵심 아이디어
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        모델 구조
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        데이터셋
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        평가방법
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        실험 결과
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Findings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Findings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#objective-evaluations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objective Evaluations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subjective-evaluations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Subjective Evaluations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Notes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Notes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        의미
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        한계
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        코드/데모
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-figurestables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Figures/Tables
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../attention_is_all_you_need/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Attention Is All You Need
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="목차">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      목차
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#abstract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Abstract
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-abstract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Abstract 요약
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 한 줄 핵심 요약
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-contribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Contribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        핵심 아이디어
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        모델 구조
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        데이터셋
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        평가방법
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        실험 결과
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Findings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Findings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#objective-evaluations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Objective Evaluations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subjective-evaluations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Subjective Evaluations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Notes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Notes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        의미
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        한계
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        코드/데모
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-figurestables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Figures/Tables
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="qwen3-tts-technical-report">Qwen3-TTS Technical Report<a class="headerlink" href="#qwen3-tts-technical-report" title="Permanent link">&para;</a></h1>
+<p><strong>Link</strong>: https://arxiv.org/abs/2601.15621<br />
+<strong>Authors</strong>: Hangrui Hu, Xinfa Zhu, Ting He, Dake Guo, Bin Zhang, Xiong Wang, Zhifang Guo, Ziyue Jiang, Hongkun Hao, Zishan Guo, Xinyu Zhang, Pei Zhang, Baosong Yang, Jin Xu, Jingren Zhou, Junyang Lin<br />
+<strong>Venue</strong>: arXiv:2601.15621 [cs.SD] (2026)<br />
+<strong>Model</strong>: <code>claude-opus-4-6</code></p>
+<hr />
+<h2 id="abstract">Abstract<a class="headerlink" href="#abstract" title="Permanent link">&para;</a></h2>
+<p>In this report, we present the Qwen3-TTS series, a family of advanced multilingual, controllable, robust, and streaming text-to-speech models. Qwen3-TTS supports state-of-the-art 3-second voice cloning and description-based control, allowing both the creation of entirely novel voices and fine-grained manipulation over the output speech. Trained on over 5 million hours of speech data spanning 10 languages, Qwen3-TTS adopts a dual-track LM architecture for real-time synthesis, coupled with two speech tokenizers: 1) Qwen-TTS-Tokenizer-25Hz is a single-codebook codec emphasizing semantic content, which offers seamlessly integration with Qwen-Audio and enables streaming waveform reconstruction via a block-wise DiT. 2) Qwen-TTS-Tokenizer-12Hz achieves extreme bitrate reduction and ultra-low-latency streaming, enabling immediate first-packet emission ($97\,\mathrm{ms}$) through its 12.5 Hz, 16-layer multi-codebook design and a lightweight causal ConvNet. Extensive experiments indicate state-of-the-art performance across diverse objective and subjective benchmark (e.g., TTS multilingual test set, InstructTTSEval, and our long speech test set). To facilitate community research and development, we release both tokenizers and models under the Apache 2.0 license.</p>
+<hr />
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<h3 id="1-abstract">1. Abstract 요약<a class="headerlink" href="#1-abstract" title="Permanent link">&para;</a></h3>
+<p>Qwen3-TTS는 Qwen 시리즈 최초의 TTS 모델 패밀리로, 다국어(10개 언어), 제어 가능성, 안정성, streaming을 핵심으로 하는 text-to-speech 시스템이다. 3초 reference audio를 이용한 zero-shot voice cloning과 자연어 설명 기반 voice design/control을 지원한다. 500만 시간 이상의 음성 데이터로 학습되었으며, dual-track LM 아키텍처와 두 가지 speech tokenizer(25Hz single-codebook 및 12Hz 16-layer multi-codebook)를 사용한다. 12Hz 변형은 97ms의 초저지연 first-packet latency를 달성하며, Seed-TTS benchmark에서 SOTA WER(test-en 1.24)을 기록하고, 10개 언어 모두에서 MiniMax, ElevenLabs 대비 우수한 speaker similarity를 보인다. 또한 InstructTTSEval에서 GPT-4o-mini-tts를 능가하는 controllable generation 성능과 10분 이상의 안정적 long-form 합성 능력을 입증하였다. 모든 모델과 tokenizer는 Apache 2.0 라이선스로 공개된다.</p>
+<h3 id="2">2. 한 줄 핵심 요약<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
+<p>500만 시간 이상의 다국어 데이터로 학습한 dual-track LM 기반 TTS 시스템으로, 두 가지 speech tokenizer(25Hz/12Hz)를 통해 SOTA zero-shot voice cloning, controllable generation, 초저지연 streaming을 동시에 달성한 오픈소스 모델 패밀리.</p>
+<h3 id="3-contribution">3. Contribution<a class="headerlink" href="#3-contribution" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>두 가지 speech tokenizer 설계</strong>: Qwen-TTS-Tokenizer-25Hz (Qwen2-Audio 기반 single-codebook, semantic+acoustic 통합)와 Qwen-TTS-Tokenizer-12Hz (12.5Hz, 16-layer multi-codebook, causal ConvNet 기반 초저지연 디코딩)</li>
+<li><strong>Dual-track LM 아키텍처</strong>: 텍스트와 음향 토큰을 채널 축으로 병합하여 streaming text input/audio output 지원, MTP(Multi-Token Prediction) 모듈로 multi-codebook 시퀀스 효과적 모델링</li>
+<li><strong>SOTA zero-shot voice cloning</strong>: Seed-TTS benchmark에서 test-en WER 1.24로 CosyVoice 3, Seed-TTS 등 기존 SOTA 능가</li>
+<li><strong>다국어 및 cross-lingual 성능</strong>: 10개 언어에서 MiniMax, ElevenLabs 대비 최고 speaker similarity, zh-to-ko에서 CosyVoice3 대비 약 66% 오류율 감소</li>
+<li><strong>Controllable generation</strong>: InstructTTSEval에서 open-source SOTA, GPT-4o-mini-tts 대비 APS +28% 향상(중국어)</li>
+<li><strong>Long-form 안정성</strong>: 10분 이상 자연스러운 음성 합성, chunk-based 시스템 대비 경계 아티팩트 없음</li>
+<li><strong>초저지연 streaming</strong>: 12Hz 0.6B 변형 97ms first-packet latency</li>
+<li><strong>Apache 2.0 라이선스</strong>로 모델 및 tokenizer 전체 공개</li>
+</ul>
+<h3 id="4-methods">4. Methods<a class="headerlink" href="#4-methods" title="Permanent link">&para;</a></h3>
+<h4 id="_1">핵심 아이디어<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h4>
+<p>순수 semantic tokenizer는 표현력 부족, 순수 acoustic tokenizer는 과도한 저수준 정보로 LLM 모델링을 어렵게 한다는 관찰에서 출발. 두 가지 tokenizer를 설계하여 semantic-acoustic 균형을 잡고, dual-track autoregressive LM으로 streaming 실시간 합성을 실현. Post-training으로 DPO, GSPO, speaker fine-tuning을 적용하여 인간 선호 정렬 및 안정성 확보.</p>
+<h4 id="_2">모델 구조<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Qwen-TTS-Tokenizer-25Hz</strong>: Qwen2-Audio 기반, 2단계 학습(Stage 1: ASR task로 VQ layer 추가, Stage 2: mel-spectrogram decoder로 acoustic 정보 주입). Codebook size 32768, 25 FPS. Streaming detokenizer는 block-wise DiT (Flow Matching) + BigVGAN으로 구현. DiT receptive field: 현재 블록 + 3-block lookback + 1-block lookahead.</li>
+<li><strong>Qwen-TTS-Tokenizer-12Hz</strong>: Mimi 아키텍처 영감, 12.5 Hz, semantic codebook 1개(WavLM teacher) + 15-layer RVQ acoustic codebook. GAN 기반 학습. Fully causal encoder/decoder로 look-ahead 불필요, causal ConvNet으로 즉시 waveform 생성.</li>
+<li><strong>Qwen3-TTS LM</strong>: Qwen3 LM 패밀리 기반. 텍스트와 음향 토큰을 채널 축으로 concatenate하는 dual-track 구조. 25Hz 변형: linear head로 single-codebook token 예측 → chunk-wise DiT waveform 복원. 12Hz 변형: backbone이 0번째 codebook 예측 → MTP 모듈이 나머지 codebook 생성.</li>
+<li><strong>모델 크기</strong>: 0.6B, 1.7B 변형 (Base, VoiceDesign, VoiceEditing, CustomVoice 등 10종)</li>
+<li><strong>Speaker encoder</strong>: backbone과 jointly 학습되는 learnable speaker encoder</li>
+<li><strong>Training</strong>: Pre-training 3단계 (S1: 500만시간+ 다국어, S2: 고품질 CPT, S3: 8K→32K token length 확장) + Post-training 3단계 (DPO, GSPO rule-based reward, speaker fine-tuning). ChatML 포맷 사용.</li>
+<li><strong>Voice design</strong>: 확률적으로 활성화되는 thinking pattern으로 복잡한 instruction following 향상</li>
+</ul>
+<h4 id="_3">데이터셋<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>학습 데이터</strong>: 500만 시간 이상 다국어 음성 데이터 (10개 언어: 중국어, 영어, 독일어, 이탈리아어, 포르투갈어, 스페인어, 일본어, 한국어, 프랑스어, 러시아어)</li>
+<li><strong>평가 데이터셋</strong>:</li>
+<li>Seed-TTS test set (test-zh, test-en) — zero-shot</li>
+<li>TTS multilingual test set (Zhang et al., 2025a) — 10개 언어</li>
+<li>CV3-Eval benchmark — cross-lingual</li>
+<li>InstructTTSEval (InstructTTSEval-ZH, InstructTTSEval-EN) — controllable</li>
+<li>LibriSpeech test-clean (2,620 utterances) — tokenizer 평가</li>
+<li>CommonVoice, Fleurs — tokenizer ASR 평가</li>
+<li>Internal long speech test set (100 texts, 200~2000 words, 중영) — long-form</li>
+</ul>
+<h4 id="_4">평가방법<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Content Consistency</strong>: WER (Word Error Rate), CER (Character Error Rate)</li>
+<li><strong>Speaker Similarity</strong>: Cosine Similarity (SIM, WavLM-based speaker verification)</li>
+<li><strong>Tokenizer 품질</strong>: PESQ (WB/NB), STOI, UTMOS, SIM</li>
+<li><strong>Controllable generation</strong>: APS (Attribute Perception and Synthesis), DSD (Description-Speech Consistency), RP (Response Precision)</li>
+<li><strong>Latency</strong>: First-Packet Latency, LM TTFP, Tokenizer Decode TPP, RTF</li>
+<li>ASR 평가에는 Qwen3-ASR (long speech), 언어별 전용 ASR 모델 사용</li>
+</ul>
+<h4 id="_5">실험 결과<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Zero-shot (Seed-TTS)</strong>: Qwen3-TTS-12Hz-1.7B-Base: test-zh WER 0.77, test-en WER <strong>1.24</strong> (SOTA). CosyVoice 3 대비 test-en 14.5% 개선.</li>
+<li><strong>Tokenizer-12Hz reconstruction</strong> (LibriSpeech test-clean): PESQ_WB <strong>3.21</strong>, PESQ_NB <strong>3.68</strong>, STOI <strong>0.96</strong>, UTMOS <strong>4.16</strong>, SIM <strong>0.95</strong> — 모든 지표에서 기존 SOTA 대비 우위 (Mimi: 2.88/3.42/0.94/3.87/0.87)</li>
+<li><strong>다국어</strong>: 10개 언어 중 6개에서 최저 WER, 10개 언어 전체에서 최고 speaker similarity (MiniMax, ElevenLabs 대비)</li>
+<li><strong>Cross-lingual</strong>: zh-to-ko WER 4.82 (CosyVoice3: 14.4, ~66% 감소), 대부분의 영어/한국어 타겟 페어에서 SOTA</li>
+<li><strong>Controllable (InstructTTSEval)</strong>: Voice Design에서 APS 85.2/82.9 (ZH/EN), open-source SOTA. Target Speaker에서 GPT-4o-mini-tts 대비 중국어 APS +28% (83.0 vs 54.9)</li>
+<li><strong>Target-Speaker</strong>: 10개 언어 중 7개에서 GPT-4o-Audio-Preview 능가 (일본어 3.88 vs 5.00, 한국어 1.74 vs 2.76)</li>
+<li><strong>Long speech</strong>: 25Hz-1.7B-CustomVoice long-zh WER <strong>1.517</strong>, long-en WER <strong>1.225</strong> (VibeVoice: 22.619/1.780, Higgs-Audio-v2: 5.505/6.917)</li>
+<li><strong>Latency</strong>: 12Hz-0.6B 1-concurrency first-packet <strong>97ms</strong>, 12Hz-1.7B <strong>101ms</strong>; 25Hz-1.7B <strong>150ms</strong></li>
+</ul>
+<h3 id="5-findings">5. Findings<a class="headerlink" href="#5-findings" title="Permanent link">&para;</a></h3>
+<h4 id="objective-evaluations">Objective Evaluations<a class="headerlink" href="#objective-evaluations" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Tokenizer-25Hz</strong>: CommonVoice/Fleurs ASR에서 S3 Tokenizer 시리즈 대비 동등 이상 (C.V. EN 7.51, Fleurs EN 3.07 — Stage 1). Stage 2에서 acoustic 정보 추가로 ASR 소폭 하락은 예상된 trade-off.</li>
+<li><strong>Tokenizer-12Hz</strong>: LibriSpeech test-clean에서 전 지표 SOTA (PESQ_WB 3.21, SIM 0.95). 12.5Hz 16-layer로 기존 50Hz 모델보다 효율적이면서 품질 우수.</li>
+<li><strong>Zero-shot</strong>: Seed-TTS test-en에서 WER 1.24로 CosyVoice 3 (1.45), Seed-TTS (2.25) 대비 명확한 SOTA.</li>
+<li><strong>12Hz vs 25Hz</strong>: 12Hz 변형이 WER 기준 일관적으로 25Hz보다 우수 — 낮은 temporal resolution이 long-term dependency 모델링에 유리. 반면 long-form에서는 25Hz가 더 안정적 (semantic token의 장점).</li>
+<li><strong>Scaling 효과</strong>: 0.6B → 1.7B 일관된 성능 향상 확인.</li>
+<li><strong>Streaming 효율</strong>: 12Hz 변형의 tokenizer decode time이 4~5ms로 극도로 낮아 25Hz(25~147ms) 대비 큰 우위. Concurrency 6에서도 12Hz-1.7B RTF 0.463 유지.</li>
+</ul>
+<h4 id="subjective-evaluations">Subjective Evaluations<a class="headerlink" href="#subjective-evaluations" title="Permanent link">&para;</a></h4>
+<ul>
+<li>논문에 명시적인 MOS(Mean Opinion Score) 등 human evaluation 수치는 보고되지 않음.</li>
+<li>다만 DPO를 통한 human preference alignment, "human-like quality" 달성 언급, ASR metric에 과적합하지 않고 perceptual quality 극대화했다고 주장.</li>
+<li>InstructTTSEval의 APS, DSD, RP 메트릭은 모델 기반 자동 평가이나 instruction following의 주관적 측면을 반영.</li>
+</ul>
+<h3 id="6-notes">6. Notes<a class="headerlink" href="#6-notes" title="Permanent link">&para;</a></h3>
+<h4 id="_6">의미<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Qwen 시리즈 최초의 TTS 모델로, LLM 생태계(Qwen3 LM, Qwen2-Audio, Qwen-Audio)와 자연스럽게 통합 가능한 설계가 핵심적 실용 가치를 지님.</li>
+<li>두 가지 tokenizer 설계(25Hz semantic-rich vs 12Hz low-latency)로 다양한 응용 시나리오(고품질 vs 초저지연)를 유연하게 지원.</li>
+<li>Zero-shot cloning, cross-lingual, controllable generation, long-form을 단일 autoregressive 프레임워크로 통합한 점이 차별화됨.</li>
+<li>Apache 2.0 오픈소스 공개로 커뮤니티 연구 및 상업적 활용 모두 가능.</li>
+<li>500만 시간 학습 데이터 규모와 DPO/GSPO post-training은 대규모 TTS 학습의 새로운 기준점 제시.</li>
+</ul>
+<h4 id="_7">한계<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h4>
+<ul>
+<li>명시적인 MOS 기반 subjective evaluation이 없어, 실제 사용자 체감 품질에 대한 직접적 검증이 부족.</li>
+<li>10개 언어로 한정되어 있으며, 저자원 언어에 대한 성능은 미검증.</li>
+<li>12Hz 변형이 long-form에서 25Hz보다 성능이 낮은 점은 multi-codebook 기반 autoregressive 모델의 장기 안정성 한계 시사.</li>
+<li>Internal test set(long speech)을 사용하여 재현성에 일부 제약.</li>
+<li>일본어, 프랑스어 등 일부 언어에서 WER이 상대적으로 높아 언어별 성능 편차 존재.</li>
+</ul>
+<h4 id="_8">코드/데모<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>GitHub</strong>: https://github.com/QwenLM/Qwen3-TTS</li>
+<li><strong>HuggingFace</strong>: https://huggingface.co/collections/Qwen/qwen3-tts</li>
+<li><strong>ModelScope</strong>: https://modelscope.cn/collections/Qwen/Qwen3-TTS</li>
+</ul>
+<hr />
+<h3 id="7-figurestables">7. Figures/Tables<a class="headerlink" href="#7-figurestables" title="Permanent link">&para;</a></h3>
+<p><strong>Figure 1: Qwen3-TTS is a multilingual, controllable, robust, and streaming text-to-speech model. Based</strong></p>
+<p><img alt="Figure 1: Qwen3-TTS is a multilingual, controllable, robust, and streaming text-to-speech model. Based" src="../figures/qwen3-tts_technical_report/fig_p1_0.png" /></p>
+<p><strong>(p.1)</strong></p>
+<p><img alt="(p.1)" src="../figures/qwen3-tts_technical_report/fig_p1_1.jpeg" /></p>
+<p><strong>(p.1)</strong></p>
+<p><img alt="(p.1)" src="../figures/qwen3-tts_technical_report/fig_p1_2.png" /></p>
+<p><strong>Figure 2: Overview of Qwen-TTS tokenizers.</strong></p>
+<p><img alt="Figure 2: Overview of Qwen-TTS tokenizers." src="../figures/qwen3-tts_technical_report/fig_p3_3.png" /></p>
+<p><strong>Figure 3: The overview of Qwen3-TTS. Dashed lines represent optional.</strong></p>
+<p><img alt="Figure 3: The overview of Qwen3-TTS. Dashed lines represent optional." src="../figures/qwen3-tts_technical_report/fig_p4_4.png" /></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  맨위로
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\ud074\ub9bd\ubcf4\ub4dc\uc5d0 \ubcf5\uc0ac\ub428", "clipboard.copy": "\ud074\ub9bd\ubcf4\ub4dc\ub85c \ubcf5\uc0ac", "search.result.more.one": "\uc774 \ubb38\uc11c\uc5d0\uc11c 1\uac1c\uc758 \uac80\uc0c9 \uacb0\uacfc \ub354 \ubcf4\uae30", "search.result.more.other": "\uc774 \ubb38\uc11c\uc5d0\uc11c #\uac1c\uc758 \uac80\uc0c9 \uacb0\uacfc \ub354 \ubcf4\uae30", "search.result.none": "\uac80\uc0c9\uc5b4\uc640 \uc77c\uce58\ud558\ub294 \ubb38\uc11c\uac00 \uc5c6\uc2b5\ub2c8\ub2e4", "search.result.one": "1\uac1c\uc758 \uc77c\uce58\ud558\ub294 \ubb38\uc11c", "search.result.other": "#\uac1c\uc758 \uc77c\uce58\ud558\ub294 \ubb38\uc11c", "search.result.placeholder": "\uac80\uc0c9\uc5b4\ub97c \uc785\ub825\ud558\uc138\uc694", "search.result.term.missing": "\ud3ec\ud568\ub418\uc9c0 \uc54a\uc740 \uac80\uc0c9\uc5b4", "select.version": "\ubc84\uc804 \uc120\ud0dd"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
