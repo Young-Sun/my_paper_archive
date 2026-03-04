@@ -4,5 +4,11 @@
     "title": "Attention Is All You Need",
     "model": "claude-sonnet-4-5-20250929",
     "stage1_only": true
+  },
+  "qwen3-tts_technical_report": {
+    "status": "done",
+    "title": "Qwen3-TTS Technical Report",
+    "model": "claude-sonnet-4-5-20250929",
+    "stage1_only": true
   }
 }

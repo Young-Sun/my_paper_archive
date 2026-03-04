@@ -49,4 +49,5 @@ markdown_extensions:
 nav:
 - Home: index.md
 - Papers:
+  - Qwen3-TTS Technical Report: papers/qwen3-tts_technical_report.md
   - Attention Is All You Need: papers/attention_is_all_you_need.md
