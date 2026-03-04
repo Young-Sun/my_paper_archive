@@ -1,4 +1,4 @@
-name: Analyze Papers & Deploy
+name: Analyze Papers
 
 on:
   workflow_dispatch:
@@ -13,20 +13,13 @@ on:
         options:
           - free
           - pro
-        default: free
+        default: pro
 
   push:
     paths:
       - "inputs/**"
     branches:
       - main
-
-# ============================================================
-# SECURITY: fork PR에서는 이 워크플로우가 실행되지 않습니다.
-# - 트리거가 push(main) + workflow_dispatch만 있어서
-#   pull_request 이벤트가 아예 없음
-# - pull_request_target도 사용하지 않음
-# ============================================================
 
 permissions:
   contents: write
@@ -36,8 +29,6 @@ permissions:
 jobs:
   analyze:
     runs-on: ubuntu-latest
-
-    # SECURITY: fork에서 실행 차단 (이중 안전장치)
     if: github.repository_owner == github.actor || github.event_name == 'push'
 
     steps:
@@ -50,59 +41,35 @@ jobs:
           python-version: "3.11"
 
       - name: Install deps
-        run: pip install anthropic openpyxl PyMuPDF mkdocs-material pyyaml
+        run: pip install anthropic PyMuPDF pyyaml
 
       - name: Analyze
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          # SECURITY: API key 존재 확인 (값은 출력하지 않음)
           if [ -z "$ANTHROPIC_API_KEY" ]; then
             echo "ERROR: ANTHROPIC_API_KEY not set"
             exit 1
           fi
           echo "API key length: ${#ANTHROPIC_API_KEY} chars"
 
-          TIER="${{ github.event.inputs.tier || 'free' }}"
+          TIER="${{ github.event.inputs.tier || 'pro' }}"
           ARGS="--input inputs/paper_links.txt --tier $TIER"
           if [ "${{ github.event.inputs.force }}" = "true" ]; then
             ARGS="$ARGS --force"
           fi
           python scripts/analyze_papers.py $ARGS
 
-      - name: Generate nav
-        run: python scripts/generate_nav.py
-
-      - name: Commit
+      - name: Commit analysis results
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/ results/ inputs/pdfs/ mkdocs.yml
+          git add docs/papers/ results/ inputs/pdfs/
           if git diff --cached --quiet; then
-            echo "No changes"
+            echo "No new analysis results"
           else
             TS=$(date -u +"%Y-%m-%d %H:%M UTC")
-            git commit -m "Analyzed papers - $TS"
+            COUNT=$(git diff --cached --name-only | grep "docs/papers/.*\.md$" | wc -l)
+            git commit -m "📄 ${COUNT} paper(s) analyzed - $TS"
             git push
           fi
-
-  deploy:
-    needs: analyze
-    runs-on: ubuntu-latest
-
-    # SECURITY: fork 차단
-    if: github.repository_owner == github.actor || github.event_name == 'push'
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Deploy MkDocs
-        run: |
-          pip install mkdocs-material
-          mkdocs gh-deploy --force
